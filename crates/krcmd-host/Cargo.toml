@@ -1,0 +1,23 @@
+[package]
+name = "krcmd-host"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "krcmd host daemon: verifies signed requests and runs registered commands"
+
+[[bin]]
+name = "krcmd-host"
+path = "src/main.rs"
+
+[dependencies]
+krcmd-proto = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal"] }
+axum = "0.7"
+toml = "0.8"
+dirs = "5"
+colored = "2"
+anyhow = "1"

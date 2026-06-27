@@ -1,0 +1,14 @@
+# krcmd trust list — one signer per line:
+#
+#   <identity>  <openssh public key line>
+#
+# The identity is whatever the remote sends (default: <user>@<hostname>, e.g.
+# ken@kai). The rest is a public key line, exactly as found in a *.pub file.
+# Blank lines and lines starting with '#' are ignored.
+#
+# Generate an entry on each dev box:
+#   echo "$USER@$(hostname) $(cat ~/.ssh/id_ed25519.pub)"
+# then paste the output here on the host.
+
+ken@kai   ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAExampleExampleExampleExampleExampleE ken@kai
+ken@kubs  ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAExampleExampleExampleExampleExampleE ken@kubs

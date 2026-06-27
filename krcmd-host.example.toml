@@ -1,0 +1,31 @@
+# krcmd-host configuration.
+#
+# Copy to one of the locations krcmd-host searches, in order:
+#   1. the path in $KRCMD_HOST_CONFIG
+#   2. ./krcmd-host.toml         (the daemon's working directory)
+#   3. <config-dir>/krcmd/krcmd-host.toml
+#      (on Windows: %APPDATA%\krcmd\krcmd-host.toml)
+#
+# Every value can also be set/overridden by an environment variable (noted below).
+
+# Socket to bind. Use a specific LAN interface rather than 0.0.0.0 if you can.
+# env: KRCMD_BIND
+bind = "0.0.0.0:42271"
+
+# Trust list of allowed signer public keys (see example.allowed_signers).
+# A leading ~ is expanded to your home directory.
+# env: KRCMD_ALLOWED_SIGNERS
+allowed_signers = "~/.krcmd/allowed_signers"
+
+# Reject requests whose timestamp is outside +/- this many seconds.
+# env: KRCMD_MAX_SKEW_SECS
+max_skew_secs = 60
+
+[commands.launch-code]
+# Path to the stable VS Code launcher.
+# env: KRCMD_CODE_PATH
+stable_path = "C:\\Users\\you\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code.cmd"
+
+# Path to the VS Code Insiders launcher. Omit if you don't use Insiders.
+# env: KRCMD_CODE_INSIDERS_PATH
+insiders_path = "C:\\Users\\you\\AppData\\Local\\Programs\\Microsoft VS Code Insiders\\bin\\code-insiders.cmd"

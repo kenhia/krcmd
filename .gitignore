@@ -1,0 +1,7 @@
+/target
+**/*.rs.bk
+# local secrets / runtime config
+.env
+*.local.toml
+allowed_signers
+!example.allowed_signers
