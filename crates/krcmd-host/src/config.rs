@@ -89,9 +89,8 @@ impl Config {
                 return Some(p);
             }
         }
-        // Per-user config directory.
-        if let Some(dir) = dirs::config_dir() {
-            let p = dir.join("krcmd").join("krcmd-host.toml");
+        // Per-user default: ~/.config/krcmd-host.toml
+        if let Some(p) = config_default_path() {
             if p.exists() {
                 return Some(p);
             }
@@ -130,6 +129,12 @@ impl Config {
 
 fn exe_dir() -> Option<PathBuf> {
     std::env::current_exe().ok()?.parent().map(Path::to_path_buf)
+}
+
+/// The per-user default config location: `~/.config/krcmd-host.toml`
+/// (on Windows, `~` is the user profile directory).
+fn config_default_path() -> Option<PathBuf> {
+    Some(dirs::home_dir()?.join(".config").join("krcmd-host.toml"))
 }
 
 fn expand_tilde(path: &Path) -> PathBuf {

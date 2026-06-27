@@ -65,9 +65,9 @@ unencrypted one.
 
 ## Host setup (Windows)
 
-1. Copy `krcmd-host.example.toml` to a place the daemon searches — `next to the
-   exe` (e.g. `C:\tools\bin\krcmd-host.toml`), `%APPDATA%\krcmd\krcmd-host.toml`,
-   or wherever `$KRCMD_HOST_CONFIG` points — and set the VS Code launcher paths.
+1. Copy `krcmd-host.example.toml` to a place the daemon searches — `~/.config/krcmd-host.toml`,
+   next to the exe (e.g. `C:\tools\bin\krcmd-host.toml`), or wherever
+   `$KRCMD_HOST_CONFIG` points — and set the VS Code launcher paths.
    The startup banner prints which config file was loaded (or that none was
    found), plus the resolved `allowed_signers` and VS Code paths — check it if a
    setting seems ignored.

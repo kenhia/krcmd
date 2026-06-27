@@ -4,8 +4,8 @@
 #   1. the path in $KRCMD_HOST_CONFIG
 #   2. ./krcmd-host.toml         (the daemon's working directory)
 #   3. krcmd-host.toml next to the krcmd-host executable (e.g. C:\tools\bin\)
-#   4. <config-dir>/krcmd/krcmd-host.toml
-#      (on Windows: %APPDATA%\krcmd\krcmd-host.toml)
+#   4. ~/.config/krcmd-host.toml
+#      (on Windows, ~ is your user profile, e.g. C:\Users\you\.config\)
 #
 # The daemon prints which file it loaded (or "no file found") at startup, so
 # check that line if a setting seems ignored.
