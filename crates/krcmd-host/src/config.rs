@@ -23,6 +23,9 @@ pub struct Config {
     /// Accepted clock skew (seconds) for request timestamps.
     pub max_skew_secs: u64,
     pub commands: Commands,
+    /// The config file this was loaded from, if any (not part of the file).
+    #[serde(skip)]
+    pub source: Option<PathBuf>,
 }
 
 impl Default for Config {
@@ -32,6 +35,7 @@ impl Default for Config {
             allowed_signers: None,
             max_skew_secs: 60,
             commands: Commands::default(),
+            source: None,
         }
     }
 }
@@ -55,14 +59,16 @@ pub struct LaunchCodeConfig {
 impl Config {
     /// Load config from the first file found, then apply env overrides.
     pub fn load() -> anyhow::Result<Self> {
-        let mut cfg = match Self::find_path() {
+        let found = Self::find_path();
+        let mut cfg = match &found {
             Some(path) => {
-                let text = std::fs::read_to_string(&path)
+                let text = std::fs::read_to_string(path)
                     .with_context(|| format!("reading {}", path.display()))?;
                 toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))?
             }
             None => Self::default(),
         };
+        cfg.source = found;
         cfg.apply_env_overrides();
         Ok(cfg)
     }
@@ -71,10 +77,19 @@ impl Config {
         if let Ok(p) = std::env::var("KRCMD_HOST_CONFIG") {
             return Some(PathBuf::from(p));
         }
+        // Next to the current working directory.
         let local = PathBuf::from("krcmd-host.toml");
         if local.exists() {
             return Some(local);
         }
+        // Next to the executable itself — the natural spot when you drop the
+        // binary and its config side by side (e.g. C:\tools\bin\).
+        if let Some(p) = exe_dir().map(|d| d.join("krcmd-host.toml")) {
+            if p.exists() {
+                return Some(p);
+            }
+        }
+        // Per-user config directory.
         if let Some(dir) = dirs::config_dir() {
             let p = dir.join("krcmd").join("krcmd-host.toml");
             if p.exists() {
@@ -113,6 +128,10 @@ impl Config {
     }
 }
 
+fn exe_dir() -> Option<PathBuf> {
+    std::env::current_exe().ok()?.parent().map(Path::to_path_buf)
+}
+
 fn expand_tilde(path: &Path) -> PathBuf {
     if let Ok(rest) = path.strip_prefix("~") {
         if let Some(home) = dirs::home_dir() {
@@ -120,4 +139,29 @@ fn expand_tilde(path: &Path) -> PathBuf {
         }
     }
     path.to_path_buf()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tilde_expands_to_home() {
+        let home = dirs::home_dir().expect("home dir");
+        // Forward slashes work cross-platform; strip_prefix splits on components.
+        assert_eq!(
+            expand_tilde(Path::new("~/.ssh/allowed_signers")),
+            home.join(".ssh").join("allowed_signers")
+        );
+    }
+
+    #[test]
+    fn absolute_path_is_unchanged() {
+        let p = if cfg!(windows) {
+            r"C:\Users\kenhi\.ssh\allowed_signers"
+        } else {
+            "/home/ken/.ssh/allowed_signers"
+        };
+        assert_eq!(expand_tilde(Path::new(p)), PathBuf::from(p));
+    }
 }

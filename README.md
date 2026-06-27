@@ -65,9 +65,12 @@ unencrypted one.
 
 ## Host setup (Windows)
 
-1. Copy `krcmd-host.example.toml` to `%APPDATA%\krcmd\krcmd-host.toml` (or keep
-   it next to the exe, or point `$KRCMD_HOST_CONFIG` at it) and set the VS Code
-   launcher paths.
+1. Copy `krcmd-host.example.toml` to a place the daemon searches — `next to the
+   exe` (e.g. `C:\tools\bin\krcmd-host.toml`), `%APPDATA%\krcmd\krcmd-host.toml`,
+   or wherever `$KRCMD_HOST_CONFIG` points — and set the VS Code launcher paths.
+   The startup banner prints which config file was loaded (or that none was
+   found), plus the resolved `allowed_signers` and VS Code paths — check it if a
+   setting seems ignored.
 2. Create the trust list. On each dev box, print its entry:
    ```console
    $ echo "$USER@$(hostname) $(cat ~/.ssh/id_ed25519.pub)"

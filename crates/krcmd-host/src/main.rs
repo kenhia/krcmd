@@ -54,7 +54,15 @@ async fn run() -> anyhow::Result<()> {
     let registry = build_registry();
     let skew = config.max_skew_secs;
 
+    let lc = &config.commands.launch_code;
     println!("{}", "krcmd-host".cyan().bold());
+    match &config.source {
+        Some(p) => println!("  config          {}", p.display()),
+        None => println!(
+            "  config          {}",
+            "(no file found — defaults + env only)".yellow()
+        ),
+    }
     println!("  bind            {bind}");
     println!(
         "  allowed signers {} ({})",
@@ -62,6 +70,14 @@ async fn run() -> anyhow::Result<()> {
         signers_path.display()
     );
     println!("  commands        {}", registry.names().join(", "));
+    println!(
+        "  vscode stable   {}",
+        lc.stable_path.as_deref().unwrap_or("(unset)")
+    );
+    println!(
+        "  vscode insiders {}",
+        lc.insiders_path.as_deref().unwrap_or("(unset)")
+    );
     println!("  max skew        {skew}s");
     if dry_run {
         println!("  {}", "DRY RUN (commands will not execute)".yellow());
