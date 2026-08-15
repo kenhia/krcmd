@@ -1,7 +1,12 @@
 /target
 **/*.rs.bk
+# local sprint marker (start-sprint / sprint-ship)
+.korg-sprint-proposal
+
 # local secrets / runtime config
 .env
 *.local.toml
 allowed_signers
 !example.allowed_signers
+.scratch/
+target/
