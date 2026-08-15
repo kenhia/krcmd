@@ -128,7 +128,10 @@ impl Config {
 }
 
 fn exe_dir() -> Option<PathBuf> {
-    std::env::current_exe().ok()?.parent().map(Path::to_path_buf)
+    std::env::current_exe()
+        .ok()?
+        .parent()
+        .map(Path::to_path_buf)
 }
 
 /// The per-user default config location: `~/.config/krcmd-host.toml`
