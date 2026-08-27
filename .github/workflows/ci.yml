@@ -1,0 +1,65 @@
+# krcmd CI — the gates `just check` runs locally, run here on every push and PR.
+#
+# Keep this file and the `check` recipe in `justfile` in step: the recipe is the
+# local mirror of this workflow, and a gate that exists in only one of them is a
+# gate that will drift. Mirrors kpolice's workflow (which mirrors korg's — korg
+# WI-1285's shape) rather than inventing a fourth one.
+#
+# The toolchain is NOT named here. `rustup toolchain install` with no arguments
+# reads `rust-toolchain.toml` — version and components — so the pin lives in
+# exactly one file and CI cannot disagree with a builder's machine. Naming a
+# version here instead (or using `dtolnay/rust-toolchain@stable`, which floats)
+# would reintroduce the drift the pin removes, one layer up where nobody would
+# look for it — and `dtolnay/rust-toolchain` installs a MINIMAL profile with no
+# `rustfmt`, so `cargo fmt --check` silently stops checking anything (learned on
+# kpidashclient-win, korg WI-1271).
+
+name: CI
+
+# Branches are gated through their pull request; `main` is gated on the merge
+# commit. Listing every branch under `push` as well would run each job twice for
+# any branch with a PR open.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+# Superseding a run is right on a branch and wrong on `main` (korg WI-846,
+# mirroring klams #792): on a branch a new push obsoletes the old commit; on
+# `main` every commit is a permanent record and needs its own verdict.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  rust:
+    name: rust (fmt, clippy, tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Installs whatever `rust-toolchain.toml` names.
+      - name: Install the pinned toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+
+      - uses: Swatinem/rust-cache@v2
+
+      # `just check`, step by step. Inlined rather than shelling out to `just`
+      # so the workflow needs no extra dependency — but it must stay identical
+      # to the recipe, or the local gate stops being a trustworthy pre-push
+      # check. Note this builds the WHOLE workspace, krcmd-host included, on
+      # Linux — the daemon only ever runs on Windows, but it compiles anywhere,
+      # and CI proving that keeps it honest.
+      - name: Formatting
+        run: cargo fmt --check
+
+      # `--all-targets` deliberately includes test targets: a gate that skips
+      # them is a gate that lies.
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Tests
+        run: cargo test

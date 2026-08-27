@@ -16,16 +16,30 @@ daemon restart. The startup banner prints the resolved config path, the
 signer count, and the VS Code launcher paths; check it whenever a setting
 seems ignored.
 
-## Launch: manual, no autostart (a known gap)
+## Launch: scheduled task at logon
 
-There is **no autostart**: not in HKCU/HKLM `Run`, not a service, not a
-scheduled task, not the Startup folder (all four checked 2026-08-27). The
-daemon runs only when someone starts it — and it was found *not running*,
-meaning `krcmd` from kai had been dead-at-rest for some time. An autostart
-(likely a logon-triggered scheduled task) is an open work item in the korg
-`krcmd` project.
+Since sprint 003 (korg WI 1677) the daemon autostarts via the Scheduled
+Task **`krcmd-host`**: at kenhi's logon, in the interactive session (it
+must be — the daemon launches VS Code onto the desktop, so a service or a
+run-whether-logged-on task would be wrong), hidden, stdout/stderr to
+`~/.config/krcmd-host.log` / `.err.log`. Registered (idempotently) by
+`scripts/install-autostart-cleo.ps1`; re-run that script after changing
+the exe path or log location.
 
-Until that lands, start it detached with output captured:
+History: before 2026-08-27 there was no autostart at all — the daemon was
+found *not running*, meaning `krcmd` from kai had been dead-at-rest for
+some time. That manual-launch era is why this section exists.
+
+To restart after a trust-list or config change (the list is read at
+startup only):
+
+```powershell
+Get-Process krcmd-host -ErrorAction SilentlyContinue | Stop-Process
+Start-ScheduledTask -TaskName krcmd-host
+```
+
+To start it by hand on a box without the task, detached with output
+captured:
 
 ```powershell
 Start-Process -FilePath 'C:\tools\bin\krcmd-host.exe' -WindowStyle Hidden `
@@ -33,15 +47,8 @@ Start-Process -FilePath 'C:\tools\bin\krcmd-host.exe' -WindowStyle Hidden `
   -RedirectStandardError  'C:\Users\kenhi\.config\krcmd-host.err.log'
 ```
 
-Verify: `Get-NetTCPConnection -LocalPort 42271 -State Listen`, and the
-banner in the `.log` file should count the expected signers.
-
-To restart (after a trust-list or config change):
-
-```powershell
-Get-Process krcmd-host | Stop-Process
-# then the Start-Process line above
-```
+Verify (either path): `Get-NetTCPConnection -LocalPort 42271 -State Listen`,
+and the banner in the `.log` file should count the expected signers.
 
 ## Client fleet (for context)
 
