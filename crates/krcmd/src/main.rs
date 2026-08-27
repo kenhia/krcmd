@@ -13,7 +13,9 @@ use crate::config::{resolve_path, CommonArgs};
 #[derive(Parser)]
 #[command(
     name = "krcmd",
-    version,
+    // Commit-stamped by build.rs. `just publish` parses this exact string to
+    // derive the store label, so the format is load-bearing, not decorative.
+    version = env!("KRCMD_VERSION_FULL"),
     about = "Send signed commands to a krcmd host"
 )]
 struct Cli {
