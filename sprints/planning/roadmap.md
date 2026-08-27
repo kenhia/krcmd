@@ -5,6 +5,12 @@
 
 ## Now
 
+- **002 — store publish + fleet deploy.** Commit-stamped `--version`,
+  `just publish` (Linux client → package store), `just deploy` (knarr →
+  kai, kubs0). First consumer of the build-clones skill. korg program 1675.
+
+## Done
+
 - **001 — onto the kprojects harness.** Layout, `just check`, agent
   instruction files. No behaviour change.
 
