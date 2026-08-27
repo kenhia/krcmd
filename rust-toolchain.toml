@@ -1,0 +1,21 @@
+[toolchain]
+# A concrete pin, not `stable` — mirrored from kpolice (its D-8, settled after
+# its fleet ran two "stable"s two minor versions apart). `channel = "stable"`
+# does not describe a build; it describes whatever `rustup update` last
+# happened to fetch on that box.
+#
+# The pin has to be true on every host that BUILDS. krcmd has two builders:
+# cleo (the canonical clone — dev builds, and krcmd-host.exe natively) and kai
+# (the build-clones cache clone — the published Linux client). kai runs 1.98.0;
+# cleo's rustup auto-installs the pin on first use. CI names no version at all:
+# the workflow runs `rustup toolchain install` with no arguments, which reads
+# THIS file — one source of truth, so CI cannot drift from a builder.
+#
+# Moving this pin is a fleet operation, not a one-line edit: korg claude-cleo
+# WI-1564 is the scheduled update cycle that owns it. A pin nothing moves is
+# just an older float.
+channel = "1.98.0"
+components = ["rustfmt", "clippy"]
+# No extra targets: `just publish` ships the Linux client only, built natively
+# on kai. If krcmd-host.exe ever joins the store, add x86_64-pc-windows-gnu
+# here (and the mingw-linker check in `just publish`) the way kpolice does.
