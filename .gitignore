@@ -10,3 +10,4 @@ allowed_signers
 !example.allowed_signers
 .scratch/
 target/
+.sprint-defaults
